@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RT Scheduling Simulator</title>
+    <style>
+        body {
+            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
+            font-family: Arial;
+            color: white;
+            text-align: center;
+            padding: 40px;
+        }
+
+        .card {
+            background: #1e2a38;
+            padding: 30px;
+            border-radius: 15px;
+            width: 400px;
+            margin: auto;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        input {
+            width: 45%;
+            padding: 10px;
+            margin: 10px;
+            border-radius: 8px;
+            border: none;
+            text-align: center;
+        }
+
+        button {
+            background: #00c6ff;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 8px;
+            color: black;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #00a2cc;
+        }
+
+        pre {
+            text-align: left;
+            background: #111;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Real-Time Scheduling Simulator</h1>
+
+    <div class="card">
+        <h3>Enter Task Details</h3>
+
+        <input id="t1_exec" placeholder="T1 Execution">
+        <input id="t1_period" placeholder="T1 Period"><br>
+
+        <input id="t2_exec" placeholder="T2 Execution">
+        <input id="t2_period" placeholder="T2 Period"><br>
+
+        <input id="sim_time" placeholder="Simulation Time"><br><br>
+
+        <button onclick="runSimulation()">Run Simulation</button>
+
+        <pre id="output"></pre>
+    </div>
+
+<script>
+function runSimulation() {
+
+    const t1_exec = parseInt(document.getElementById("t1_exec").value);
+    const t1_period = parseInt(document.getElementById("t1_period").value);
+    const t2_exec = parseInt(document.getElementById("t2_exec").value);
+    const t2_period = parseInt(document.getElementById("t2_period").value);
+    const sim_time = parseInt(document.getElementById("sim_time").value);
+
+    if (isNaN(t1_exec) || isNaN(t1_period) || isNaN(t2_exec) || isNaN(t2_period) || isNaN(sim_time)) {
+        alert("Please fill all fields correctly!");
+        return;
+    }
+
+    fetch('/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+            tasks: [
+                { name: "T1", execution: t1_exec, period: t1_period },
+                { name: "T2", execution: t2_exec, period: t2_period }
+            ],
+            time: sim_time
+        })
+    })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("output").innerText =
+            "RMS:\n" + JSON.stringify(data.RMS, null, 2) +
+            "\n\nEDF:\n" + JSON.stringify(data.EDF, null, 2);
+    })
+    .catch(err => {
+        console.error(err);
+        alert("Error connecting to server!");
+    });
+}
+</script>
+
+</body>
+</html>
